@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% if title %}{{ title }} – {% endif %}{{ site.name }}</title>
+<meta name="description" content="{{ description or site.description }}">
+<link rel="preload" href="/assets/fonts/atkinson-hyperlegible-next-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css">
+<script src="/assets/enhance.js" type="module"></script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to main content</a>
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="/">{{ site.name }}</a>
+    <nav aria-label="Site">
+      <ul>
+        <li><a href="/about/"{% if page.url == "/about/" %} aria-current="page"{% endif %}>About</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+<main id="main" class="wrap">
+{{ content | safe }}
+</main>
+<footer class="site-footer">
+  <div class="wrap">
+    <p>zoteamo is free software under the <a href="{{ site.source }}/blob/main/LICENSE">GNU AGPL</a>. <a href="{{ site.source }}">Source code</a>.</p>
+  </div>
+</footer>
+</body>
+</html>

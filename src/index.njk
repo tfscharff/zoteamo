@@ -1,0 +1,25 @@
+---
+title: Create a reading list
+---
+<h1>{{ site.tagline }}</h1>
+<p class="lede">Paste a link, DOI or ISBN and get a proper citation in APA, MLA or Chicago. Share one link with your group to edit the list, and another with anyone who should only read it. No accounts.</p>
+
+<form method="post" action="/api/lists" class="stack" aria-labelledby="create-title">
+  <h2 id="create-title">Create a reading list</h2>
+  <div class="field">
+    <label for="title">List name</label>
+    <input id="title" name="title" type="text" required maxlength="300" autocomplete="off">
+  </div>
+  <div class="field">
+    <label for="description">Description <span class="optional">(optional)</span></label>
+    <textarea id="description" name="description" rows="3" maxlength="2000"></textarea>
+  </div>
+  <fieldset class="field">
+    <legend>Default citation style</legend>
+    <p class="hint" id="default_style-hint">Anyone viewing the list can switch styles for themselves.</p>
+    <div class="choice"><input type="radio" id="default_style" name="default_style" value="apa" checked aria-describedby="default_style-hint"><label for="default_style">APA (7th edition)</label></div>
+    <div class="choice"><input type="radio" id="default_style-mla" name="default_style" value="mla" aria-describedby="default_style-hint"><label for="default_style-mla">MLA (9th edition)</label></div>
+    <div class="choice"><input type="radio" id="default_style-chicago" name="default_style" value="chicago" aria-describedby="default_style-hint"><label for="default_style-chicago">Chicago (notes and bibliography)</label></div>
+  </fieldset>
+  <button type="submit">Create reading list</button>
+</form>
