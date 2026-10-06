@@ -11,6 +11,8 @@ export async function renderList({ request, env }, list, { canEdit, token, statu
   const { style, cookie: styleCookie } = chooseStyle(url, jar, list.default_style);
   const { voterId, cookie: voterCookie } = canEdit ? ensureVoter(jar) : { voterId: '', cookie: null };
   const items = await listItems(env.DB, list.id, voterId);
-  const body = listPage({ list, items, canEdit, token, origin: url.origin, params: url.searchParams, style, forms });
-  return renderPage({ title: list.title, body, status, cookies: [...cookies, styleCookie, voterCookie].filter(Boolean) });
+  const add = forms.add ?? { values: { addedBy: jar.zoteamo_name ?? '' }, errors: [] };
+  const body = listPage({ list, items, canEdit, token, origin: url.origin, params: url.searchParams, style, forms: { ...forms, add } });
+  const title = status >= 400 ? `Error: ${list.title}` : list.title;
+  return renderPage({ title, body, status, cookies: [...cookies, styleCookie, voterCookie].filter(Boolean) });
 }

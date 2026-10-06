@@ -55,3 +55,12 @@ export async function markFailed(db, itemId, message, now = NOW()) {
   await db.prepare(`UPDATE items SET citation_state = 'failed', citation_error = ?, updated_at = ? WHERE id = ?`)
     .bind(message, now, itemId).run();
 }
+
+export async function countItemsSince(db, listId, sinceIso) {
+  const row = await db.prepare('SELECT COUNT(*) AS n FROM items WHERE list_id = ? AND created_at > ?').bind(listId, sinceIso).first();
+  return row.n;
+}
+
+export async function deleteItem(db, listId, itemId) {
+  await db.prepare('DELETE FROM items WHERE id = ? AND list_id = ?').bind(itemId, listId).run();
+}

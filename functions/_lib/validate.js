@@ -24,3 +24,12 @@ export function validateListSettings(form) {
   }
   return { values, errors };
 }
+
+export function validateAddItem(form) {
+  const values = { input: form.get('input'), addedBy: form.get('added_by'), note: form.get('note') };
+  const errors = [];
+  if (values.input.length > LIMITS.input) errors.push({ field: 'input', message: `Keep it to ${LIMITS.input} characters or fewer.` });
+  if (values.addedBy.length > LIMITS.addedBy) errors.push({ field: 'added_by', message: `Keep your name to ${LIMITS.addedBy} characters or fewer.` });
+  if (values.note.length > LIMITS.note) errors.push({ field: 'note', message: `Keep the note to ${LIMITS.note} characters or fewer.` });
+  return { values, errors };
+}
