@@ -15,6 +15,7 @@
   --accent: #0b4a6f; --accent-text: #ffffff; --border: #5c5c5c;
   --error: #8a1414; --error-bg: #fdf0f0; --notice-bg: #eef5f9; --focus: #b34700;
   --radius: 6px; --space: 1rem;
+  color-scheme: light dark;
   font-family: "Atkinson Hyperlegible Next", system-ui, sans-serif;
   font-size: 112.5%; line-height: 1.6; color: var(--text); background: var(--bg);
 }
@@ -63,7 +64,7 @@ input:not([type="radio"], [type="checkbox"]), select, textarea {
 input[aria-invalid="true"], textarea[aria-invalid="true"], select[aria-invalid="true"] { border-color: var(--error); }
 .choice { display: flex; align-items: center; gap: 0.6rem; min-height: 44px; }
 .choice input { width: 1.4rem; height: 1.4rem; margin: 0; }
-.choice label { font-weight: 400; }
+.choice label { font-weight: 400; flex: 1; min-height: 44px; display: flex; align-items: center; }
 
 button, .button-link {
   font: inherit; font-weight: 700; display: inline-flex; align-items: center; justify-content: center;

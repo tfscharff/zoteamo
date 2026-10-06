@@ -1,6 +1,6 @@
 {
   "name": "zoteamo",
-  "version": "0.13.0",
+  "version": "0.14.0",
   "private": true,
   "description": "Collaborative reading lists for reading groups: paste a URL, DOI or ISBN, get proper citations.",
   "license": "AGPL-3.0-or-later",
@@ -16,13 +16,16 @@
     "test": "node --test \"tests/**/*.test.mjs\" && vitest run",
     "test:unit": "vitest run --project unit",
     "test:workers": "vitest run --project workers",
+    "a11y": "node scripts/a11y.mjs",
     "ship": "node scripts/ship.mjs"
   },
   "devDependencies": {
     "@11ty/eleventy": "^3.1.6",
     "@cloudflare/vitest-pool-workers": "^0.22.0",
     "@fontsource/atkinson-hyperlegible-next": "^5.3.0",
+    "happy-dom": "^20.14.5",
     "html-validate": "^11.16.2",
+    "pa11y-ci": "^5.0.0",
     "vitest": "^4.1.11",
     "wrangler": "^4.148.0"
   },

@@ -5,6 +5,7 @@
       "Bash(npm run ship:*)",
       "Bash(npm run build:*)",
       "Bash(npm run validate:*)",
+      "Bash(npm run a11y:*)",
       "Bash(npm run dev:*)",
       "Bash(npm install:*)",
       "Bash(npm ci:*)",

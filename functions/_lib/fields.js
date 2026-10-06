@@ -85,9 +85,9 @@ export function formForItem(item) {
 export function readEditForm(form) {
   const values = Object.fromEntries(FORM_FIELDS.map((f) => [f, form.get(f)]));
   values.itemType = form.get('itemType');
-  const first = form.getAll('creator_first');
-  const roles = form.getAll('creator_role');
-  values.creators = form.getAll('creator_last')
+  const first = form.getAll('creator_first[]');
+  const roles = form.getAll('creator_role[]');
+  values.creators = form.getAll('creator_last[]')
     .map((lastName, i) => ({ firstName: first[i] ?? '', lastName, creatorType: roles[i] || 'author' }))
     .filter((c) => c.firstName || c.lastName);
   return values;

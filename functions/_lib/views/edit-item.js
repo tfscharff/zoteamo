@@ -11,9 +11,9 @@ function creatorRow(creator, n, errors, allowed) {
   const roles = keys.map((key) => [key, roleLabel(key)]);
   return html`<fieldset class="creator">
 <legend>Person ${n}</legend>
-${textField({ id: `creator-first-${n}`, name: 'creator_first', label: 'First name', optional: true, value: creator.firstName, maxlength: 200, autocomplete: 'off' })}
-${textField({ id: `creator-last-${n}`, name: 'creator_last', label: 'Last name or organization', value: creator.lastName, error: errorFor(errors, `creator-last-${n}`), maxlength: 200, autocomplete: 'off' })}
-${selectField({ id: `creator-role-${n}`, name: 'creator_role', label: 'Role', options: roles, selected: creator.creatorType })}
+${textField({ id: `creator-first-${n}`, name: 'creator_first[]', label: 'First name', optional: true, value: creator.firstName, maxlength: 200, autocomplete: 'off' })}
+${textField({ id: `creator-last-${n}`, name: 'creator_last[]', label: 'Last name or organization', value: creator.lastName, error: errorFor(errors, `creator-last-${n}`), maxlength: 200, autocomplete: 'off' })}
+${selectField({ id: `creator-role-${n}`, name: 'creator_role[]', label: 'Role', options: roles, selected: creator.creatorType, error: errorFor(errors, `creator-role-${n}`) })}
 </fieldset>`;
 }
 
@@ -43,7 +43,7 @@ ${field('place', 'Place published')}
 ${field('volume', 'Volume')}
 ${field('issue', 'Issue')}
 ${field('pages', 'Pages', { hint: 'For example 45–67.' })}
-${field('url', 'Web address', { type: 'url', autocomplete: 'url' })}
+${field('url', 'Web address', { type: 'url' })}
 ${field('DOI', 'DOI')}
 ${field('ISBN', 'ISBN')}
 ${field('accessDate', 'Date accessed', { hint: 'For web pages, for example 2026-10-06.' })}

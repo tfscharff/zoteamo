@@ -17,9 +17,9 @@ const ARTICLE = [
   ['itemType', 'journalArticle'], ['title', 'Reading Together'], ['container', 'Journal of Groups'],
   ['date', '2019'], ['volume', '12'], ['issue', '3'], ['pages', '45-67'], ['DOI', '10.1234/jog'],
   ['publisher', 'Ignored'], ['place', ''], ['url', ''], ['ISBN', ''], ['accessDate', ''],
-  ['creator_first', 'Alex'], ['creator_last', 'Smith'], ['creator_role', 'author'],
-  ['creator_first', ''], ['creator_last', 'Example Society'], ['creator_role', 'editor'],
-  ['creator_first', ''], ['creator_last', ''], ['creator_role', 'author'],
+  ['creator_first[]', 'Alex'], ['creator_last[]', 'Smith'], ['creator_role[]', 'author'],
+  ['creator_first[]', ''], ['creator_last[]', 'Example Society'], ['creator_role[]', 'editor'],
+  ['creator_first[]', ''], ['creator_last[]', ''], ['creator_role[]', 'author'],
 ];
 
 describe('edit a citation by hand', () => {
@@ -67,6 +67,17 @@ describe('edit a citation by hand', () => {
     expect(page).toContain('<a href="#title">Enter a title.</a>');
     expect(page).toContain('value="Journal of Groups"');
     expect(page).toContain('value="Example Society"');
+  });
+
+  it('shows a role error inline as well as in the summary', async () => {
+    const { id, editToken } = await createTestList();
+    const itemId = await seedItem(id, { title: 'A Book' });
+    const form = [['itemType', 'webpage'], ['title', 'A Page'], ['creator_first[]', ''], ['creator_last[]', 'Smith'], ['creator_role[]', 'editor']];
+    const res = await post(saveEdit, editToken, itemId, 'edit', form);
+    expect(res.status).toBe(422);
+    const page = await res.text();
+    expect(page).toContain('id="creator-role-1-error"');
+    expect(page).toContain('<a href="#creator-role-1">');
   });
 
   it('keeps the edit when the formatter is down', async () => {

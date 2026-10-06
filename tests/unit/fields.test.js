@@ -24,7 +24,7 @@ describe('formForItem', () => {
 describe('readEditForm', () => {
   it('zips creator rows and drops empty ones', () => {
     const values = readEditForm(formOf({ itemType: 'book', title: 'T' }, {
-      creator_first: ['Ana', '', ''], creator_last: ['Ruiz', 'Example Society', ''], creator_role: ['author', 'editor', 'author'],
+      'creator_first[]': ['Ana', '', ''], 'creator_last[]': ['Ruiz', 'Example Society', ''], 'creator_role[]': ['author', 'editor', 'author'],
     }));
     expect(values.creators).toEqual([
       { firstName: 'Ana', lastName: 'Ruiz', creatorType: 'author' },
