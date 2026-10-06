@@ -22,6 +22,8 @@ export function itemActions(item, { token, title }) {
   const path = `${base}/items/${item.id}`;
   return html`<div class="item-actions">
 <form method="post" action="${path}/vote"><button type="submit" class="secondary">${item.voted ? 'Remove vote' : 'Vote'}${hiddenText(`for ${title}`)}</button></form>
+${item.citation_state !== 'ready' ? html`<form method="post" action="${path}/retry"><button type="submit" class="secondary">Retry${hiddenText(`citation for ${title}`)}</button></form>` : ''}
+<a href="${path}/edit">Edit citation${hiddenText(`for ${title}`)}</a>
 <a href="${path}/delete">Delete${hiddenText(title)}</a>
 <details><summary>Change status${hiddenText(`of ${title}`)}</summary>
 ${statusForm({ base, item, title })}
