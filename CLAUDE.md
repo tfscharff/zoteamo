@@ -30,9 +30,12 @@ The "Decisions already made" table in it is settled, so don't reopen those decis
 ## Commands (current)
 
 ```bash
-npm test                                   # node:test suite (tests/**/*.test.mjs)
-node --test tests/release.test.mjs         # one file
-node --test --test-name-pattern="bumpFor"  # one test by name
+npm test                                   # node:test (tests/*.test.mjs) + Vitest (unit + workers)
+npm run test:unit                          # Vitest, Node environment (tests/unit)
+npm run test:workers                       # Vitest in workerd with D1 (tests/functions)
+npx vitest run tests/unit/http.test.js     # one Vitest file
+npx vitest run -t "parses cookies"         # one Vitest test by name
+node --test tests/release.test.mjs         # one node:test file
 npm run ship -- "type: msg" --dry-run      # preview a release
 ```
 

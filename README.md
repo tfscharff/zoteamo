@@ -28,7 +28,7 @@ Requires Node 22 or later.
 
 ```bash
 npm install
-npm test            # unit tests (release script for now; app tests to come)
+npm test            # node:test for tooling + Vitest (unit and Workers/D1 suites)
 ```
 
 Setup for the dev server, D1 and Lambda deployment will be added here as they're built.

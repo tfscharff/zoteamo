@@ -9,3 +9,4 @@ infra/.build/
 .aws-sam/
 coverage/
 .claude/settings.local.json
+.a11y/
