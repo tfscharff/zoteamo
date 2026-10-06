@@ -1,5 +1,6 @@
 // Calls a Pages Function handler directly with a realistic context.
 import { env } from 'cloudflare:test';
+import { createList } from '../../functions/_lib/db/lists.js';
 
 export const ORIGIN = 'https://zoteamo.test';
 
@@ -16,3 +17,6 @@ export async function call(handler, { method = 'GET', path = '/', params = {}, f
 }
 
 export const location = (res) => res.headers.get('location');
+
+export const createTestList = (overrides = {}) =>
+  createList(env.DB, { title: 'Test list', description: '', defaultStyle: 'apa', ...overrides });
