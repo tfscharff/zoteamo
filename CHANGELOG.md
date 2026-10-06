@@ -3,6 +3,10 @@
 All notable changes to zoteamo. Every commit to `main` is a release, written by
 `npm run ship` ([Semantic Versioning](https://semver.org/), [Conventional Commits](https://www.conventionalcommits.org/)).
 
+## [0.5.0] - 2026-10-06
+
+- **feat(items):** add citation HTML sanitizer and COinS rebuilder
+
 ## [0.4.0] - 2026-10-06
 
 - **feat(items):** detect URLs, DOIs, ISBNs, PMIDs and arXiv IDs
