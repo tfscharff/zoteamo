@@ -76,3 +76,13 @@ export async function updateStatus(db, listId, itemId, { status, meetingDate, no
   await db.prepare('UPDATE items SET status = ?, meeting_date = ?, note = ?, updated_at = ? WHERE id = ? AND list_id = ?')
     .bind(status, meetingDate || null, note, now, itemId, listId).run();
 }
+
+export async function listExportItems(db, listId) {
+  const { results } = await db.prepare(
+    `SELECT items.id, items.status, items.meeting_date, items.created_at, items.updated_at,
+       items.bibtex, items.ris, items.text_apa, items.text_mla, items.text_chicago,
+       (SELECT COUNT(*) FROM votes WHERE votes.item_id = items.id) AS votes
+     FROM items WHERE items.list_id = ? AND items.citation_state = 'ready'`,
+  ).bind(listId).all();
+  return results;
+}

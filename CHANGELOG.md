@@ -3,6 +3,10 @@
 All notable changes to zoteamo. Every commit to `main` is a release, written by
 `npm run ship` ([Semantic Versioning](https://semver.org/), [Conventional Commits](https://www.conventionalcommits.org/)).
 
+## [0.13.0] - 2026-10-06
+
+- **feat(exports):** export lists as BibTeX, RIS and plain text
+
 ## [0.12.0] - 2026-10-06
 
 - **feat(items):** edit citations by hand and retry failed lookups
