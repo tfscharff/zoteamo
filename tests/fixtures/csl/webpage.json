@@ -1,0 +1,1 @@
+{ "type": "webpage", "title": "Meeting Notes", "container-title": "Group Blog", "URL": "https://example.org/notes", "author": [{ "literal": "Example Society" }], "issued": { "date-parts": [[2021, 5, 4]] }, "accessed": { "date-parts": [[2026, 10, 1]] } }

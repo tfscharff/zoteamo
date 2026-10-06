@@ -1,0 +1,1 @@
+{ "type": "book", "title": "The Reading Group", "author": [{ "family": "Doe", "given": "Jane" }], "issued": { "date-parts": [[2020]] }, "publisher": "Example Press", "publisher-place": "Chicago" }

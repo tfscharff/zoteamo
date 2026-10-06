@@ -3,6 +3,10 @@
 All notable changes to zoteamo. Every commit to `main` is a release, written by
 `npm run ship` ([Semantic Versioning](https://semver.org/), [Conventional Commits](https://www.conventionalcommits.org/)).
 
+## [0.15.0] - 2026-10-06
+
+- **feat(format):** add the citeproc-js formatter Lambda
+
 ## [0.14.0] - 2026-10-06
 
 - **feat(site):** add copy buttons, live style switching and the a11y audit
