@@ -2,6 +2,7 @@ import { env } from 'cloudflare:test';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { onRequestGet as editPage } from '../../functions/e/[token]/index.js';
 import { onRequestPost as addItem } from '../../functions/e/[token]/items/index.js';
+import { onRequestPost as retryItem } from '../../functions/e/[token]/items/[id]/retry.js';
 import { onRequestPost as selectItem } from '../../functions/e/[token]/items/[id]/select.js';
 import { fakeLambda } from './fake-lambda.js';
 import { call, createTestList, location, seedItem } from './helpers.js';
@@ -67,6 +68,13 @@ describe('add an item', () => {
     const res = await add(editToken, { input: 'https://example.com/nothing-here' });
     const [, itemId] = location(res).match(new RegExp(`^/e/${editToken}/items/([0-9a-f-]{36})/edit\\?lookup=failed$`));
     expect(await row(itemId)).toMatchObject({ citation_state: 'failed', citation_error: 'No citation details could be found there.' });
+  });
+
+  it('points the style switcher at the edit page after a 422', async () => {
+    fakeLambda();
+    const { editToken } = await createTestList();
+    const page = await (await add(editToken, { input: 'http://localhost/secret' })).text();
+    expect(page).toContain(`<form method="get" action="/e/${editToken}" class="style-switch">`);
   });
 
   it('survives translation-server being unreachable', async () => {
@@ -141,13 +149,31 @@ describe('several items on one page', () => {
     expect(await row(itemId)).toMatchObject({ citation_state: 'ready', title: 'Picked' });
   });
 
-  it('removes the pending item when the choice has expired', async () => {
+  it('marks the item failed when the choice has expired', async () => {
     const { editToken, itemId } = await startChoice({
       'translation.test /web': (_url, body) => (body.startsWith('{') ? new Response('expired', { status: 400 }) : Response.json(MULTIPLE, { status: 300 })),
     });
     const res = await choose(editToken, itemId, { url: MULTIPLE.url, session: 'sess-1', choices: JSON.stringify(MULTIPLE.items), choice: '0' });
     expect(location(res)).toBe(`/e/${editToken}?error=choice_expired`);
-    expect(await row(itemId)).toBeNull();
+    expect(await row(itemId)).toMatchObject({
+      citation_state: 'failed',
+      citation_error: 'That choice expired before it could be saved. Paste a more specific link, or the item\u2019s DOI if it has one.',
+    });
+  });
+
+  it('lets a failed URL item be retried, choose again and become ready', async () => {
+    const { editToken, itemId } = await startChoice({
+      'translation.test /web': (_url, body) => (body.startsWith('{') ? new Response('expired', { status: 400 }) : Response.json(MULTIPLE, { status: 300 })),
+    });
+    await choose(editToken, itemId, { url: MULTIPLE.url, session: 'sess-1', choices: JSON.stringify(MULTIPLE.items), choice: '0' });
+    expect(await row(itemId)).toMatchObject({ citation_state: 'failed' });
+    fakeLambda(multipleRoute);
+    const retried = await call(retryItem, { method: 'POST', path: `/e/${editToken}/items/${itemId}/retry`, params: { token: editToken, id: itemId } });
+    expect(retried.status).toBe(200);
+    expect(await row(itemId)).toMatchObject({ citation_state: 'pending', citation_error: null });
+    const res = await choose(editToken, itemId, { url: MULTIPLE.url, session: 'sess-1', choices: JSON.stringify(MULTIPLE.items), choice: '1' });
+    expect(location(res)).toBe(`/e/${editToken}?added=${itemId}#item-${itemId}`);
+    expect(await row(itemId)).toMatchObject({ citation_state: 'ready', title: 'Picked' });
   });
 
   it('refuses a tampered private URL without calling translation-server', async () => {
@@ -183,12 +209,12 @@ describe('several items on one page', () => {
   it.each([
     ['choices that are not JSON', { choices: 'not json', choice: '0' }],
     ['a choice key that is not offered', { choices: JSON.stringify(MULTIPLE.items), choice: '9' }],
-  ])('removes the pending item for %s without a lookup', async (_name, fields) => {
+  ])('marks the pending item failed for %s without a lookup', async (_name, fields) => {
     const { calls, editToken, itemId } = await startChoice();
     const before = calls.length;
     const res = await choose(editToken, itemId, { url: MULTIPLE.url, session: 'sess-1', ...fields });
     expect(location(res)).toBe(`/e/${editToken}?error=choice_expired`);
-    expect(await row(itemId)).toBeNull();
+    expect(await row(itemId)).toMatchObject({ citation_state: 'failed' });
     expect(calls.slice(before).filter((c) => c.body.startsWith('{'))).toHaveLength(0);
   });
 });

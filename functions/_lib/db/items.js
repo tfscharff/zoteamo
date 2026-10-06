@@ -56,6 +56,10 @@ export async function markFailed(db, itemId, message, now = NOW()) {
     .bind(message, now, itemId).run();
 }
 
+export async function markPending(db, itemId, now = NOW()) {
+  await db.prepare(`UPDATE items SET citation_state = 'pending', citation_error = NULL, updated_at = ? WHERE id = ?`).bind(now, itemId).run();
+}
+
 export async function countItemsSince(db, listId, sinceIso) {
   const row = await db.prepare('SELECT COUNT(*) AS n FROM items WHERE list_id = ? AND created_at > ?').bind(listId, sinceIso).first();
   return row.n;
@@ -68,7 +72,7 @@ export async function deleteItem(db, listId, itemId) {
 export async function toggleVote(db, itemId, voterId, now = NOW()) {
   const removed = await db.prepare('DELETE FROM votes WHERE item_id = ? AND voter_id = ?').bind(itemId, voterId).run();
   if (removed.meta.changes > 0) return false;
-  await db.prepare('INSERT INTO votes (item_id, voter_id, created_at) VALUES (?, ?, ?)').bind(itemId, voterId, now).run();
+  await db.prepare('INSERT OR IGNORE INTO votes (item_id, voter_id, created_at) VALUES (?, ?, ?)').bind(itemId, voterId, now).run();
   return true;
 }
 

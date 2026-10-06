@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { bootstrapArgs, bucketName, copyFilter, deployArgs, packageArgs, parseRef } from '../scripts/lib/deploy.mjs';
+import { bootstrapArgs, bucketName, checkoutProblem, cloneArgs, copyFilter, deployArgs, packageArgs, parseRef } from '../scripts/lib/deploy.mjs';
 
 test('parseRef accepts only a full commit SHA', () => {
   assert.equal(parseRef(' 3a9d17614896fc1fea73d7b880ea79273b605275\n'), '3a9d17614896fc1fea73d7b880ea79273b605275');
@@ -42,4 +42,16 @@ test('copyFilter skips git metadata and npm shims on either slash style', () => 
   assert.equal(copyFilter('infra\\.build\\translation-server\\node_modules\\.bin\\mocha'), false);
   assert.equal(copyFilter('infra/.build/translation-server/node_modules/koa/index.js'), true);
   assert.equal(copyFilter('infra/.build/translation-server/modules/translators/DOI.js'), true);
+});
+
+test('the translation-server clone keeps upstream line endings', () => {
+  const args = cloneArgs('https://example.test/repo.git', 'infra/.build/ts');
+  assert.deepEqual(args.slice(0, 3), ['-c', 'core.autocrlf=false', 'clone']);
+  assert.deepEqual(args.slice(3), ['https://example.test/repo.git', 'infra/.build/ts']);
+});
+
+test('a source directory without its own .git is refused, not treated as the parent repo', () => {
+  assert.match(checkoutProblem({ dirExists: true, gitExists: false }, 'src-dir'), /src-dir exists but is not a git checkout/);
+  assert.equal(checkoutProblem({ dirExists: true, gitExists: true }, 'src-dir'), null);
+  assert.equal(checkoutProblem({ dirExists: false, gitExists: false }, 'src-dir'), null);
 });

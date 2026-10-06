@@ -30,6 +30,13 @@ describe('votes', () => {
     expect(await votes(itemId)).toBe(0);
   });
 
+  it('survives a double submit from the same voter', async () => {
+    const { editToken, itemId } = await setup();
+    const [a, b] = await Promise.all([1, 2].map(() => post(voteRoute, editToken, `/items/${itemId}/vote`, { id: itemId, cookie: VOTER })));
+    expect([a.status, b.status]).toEqual([303, 303]);
+    expect(await votes(itemId)).toBeLessThanOrEqual(1);
+  });
+
   it('gives a new voter a cookie', async () => {
     const { editToken, itemId } = await setup();
     const res = await post(voteRoute, editToken, `/items/${itemId}/vote`, { id: itemId });

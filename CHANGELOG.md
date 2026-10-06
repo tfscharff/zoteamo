@@ -3,6 +3,10 @@
 All notable changes to zoteamo. Every commit to `main` is a release, written by
 `npm run ship` ([Semantic Versioning](https://semver.org/), [Conventional Commits](https://www.conventionalcommits.org/)).
 
+## [0.16.1] - 2026-10-06
+
+- **fix:** accept same-site form posts and harden pre-deploy edges
+
 ## [0.16.0] - 2026-10-06
 
 - **feat(infra):** add Lambda templates, deploy scripts and cost guardrails

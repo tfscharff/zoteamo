@@ -1,5 +1,5 @@
 // Turns a detected input into a stored citation: look it up, maybe ask which item, then derive and save.
-import { deleteItem, markFailed } from './db/items.js';
+import { markFailed, markPending } from './db/items.js';
 import { deriveAndSave, lookup, lookupChoice, LookupError } from './enrich.js';
 import { redirect } from './http.js';
 import { createLambdaClient, LambdaError } from './lambda.js';
@@ -20,6 +20,7 @@ export async function runLookup({ env, base, itemId, detected, cookies = [] }) {
     return redirect(`${base}/items/${itemId}/edit?lookup=failed`, { cookies });
   }
   if (result.kind === 'choose') {
+    await markPending(env.DB, itemId);
     return renderPage({ title: 'Which item did you mean?', body: selectPage({ base, itemId, ...result }), cookies });
   }
   await deriveAndSave(client, env.DB, itemId, result.item);
@@ -35,7 +36,7 @@ export async function runChoice({ env, base, list, itemId, url, session, choices
     return redirect(addedUrl(base, itemId));
   } catch (error) {
     if (!isExpected(error)) throw error;
-    await deleteItem(env.DB, list.id, itemId);
+    await markFailed(env.DB, itemId, 'That choice expired before it could be saved. Paste a more specific link, or the item’s DOI if it has one.');
     return redirect(`${base}?error=choice_expired`);
   }
 }

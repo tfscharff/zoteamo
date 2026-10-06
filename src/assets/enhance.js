@@ -106,3 +106,5 @@ enhanceCopy(document);
 enhanceStyleSwitch(document.querySelector('form.style-switch'));
 enhanceBusyForms();
 document.querySelector('.error-summary')?.focus();
+const statusText = document.querySelector('.status-message')?.textContent.trim();
+if (statusText) announce(statusText);

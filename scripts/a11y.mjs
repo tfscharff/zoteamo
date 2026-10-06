@@ -5,6 +5,7 @@ import { execFileSync, spawn } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
+import puppeteer from 'puppeteer';
 
 const PORT = 8788;
 const BASE = `http://127.0.0.1:${PORT}`;
@@ -71,6 +72,27 @@ function stop(server) {
   }
 }
 
+// Real-browser regression check: a form POST must carry a same-origin Origin header, never "null".
+async function checkCreateForm() {
+  const browser = await puppeteer.launch({ args: ['--no-sandbox'] });
+  try {
+    const page = await browser.newPage();
+    await page.goto(`${BASE}/`, { waitUntil: 'networkidle0' });
+    await page.type('#title', 'Browser check list');
+    await Promise.all([
+      page.waitForNavigation({ waitUntil: 'networkidle0' }),
+      page.click('form[action="/api/lists"] button[type="submit"]'),
+    ]);
+    const url = page.url();
+    if (!/\/e\/[A-Za-z0-9_-]{22}\?created=1$/.test(url)) {
+      throw new Error(`Create-form check failed: expected a redirect to /e/{token}?created=1 but ended at ${url}. A browser may be sending a bad Origin header (check Referrer-Policy).`);
+    }
+    console.log('Create-form check passed: the browser submitted the form and landed on /e/<token>?created=1.');
+  } finally {
+    await browser.close();
+  }
+}
+
 async function portInUse() {
   try {
     await fetch(`${BASE}/`);
@@ -100,6 +122,7 @@ async function main() {
       urls: Object.values(PAGES).map((path) => BASE + path),
     }, null, 2));
     run('npx', ['pa11y-ci', '--config', join(OUT, 'pa11y.json')]);
+    await checkCreateForm();
   } finally {
     stop(server);
   }

@@ -11,8 +11,8 @@ const SECTIONS = [
   ['discussed', 'Discussed', 'Nothing has been discussed yet.'],
 ];
 
-function styleSwitch(style) {
-  return html`<form method="get" class="style-switch">
+function styleSwitch(style, action) {
+  return html`<form method="get" action="${action}" class="style-switch">
 <div class="field"><label for="style">Citation style</label>
 <select id="style" name="style">${STYLES.map((s) => html`<option value="${s}"${attr('selected', s === style)}>${STYLE_LABELS[s]}</option>`)}</select></div>
 <button type="submit" class="secondary">Show citations</button>
@@ -35,7 +35,7 @@ function exportLinks(list, style) {
 export function itemsRegion({ items, style, canEdit, token, list }) {
   const groups = orderItems(items);
   return html`<div id="items">
-${styleSwitch(style)}
+${styleSwitch(style, canEdit ? `/e/${token}` : `/l/${list.view_token}`)}
 ${SECTIONS.map(([key, heading, empty]) => html`<section aria-labelledby="section-${key}">
 <h2 id="section-${key}">${heading} <span class="count">(${groups[key].length})</span></h2>
 ${groups[key].length ? groups[key].map((item) => itemArticle(item, { style, canEdit, token })) : html`<p>${empty}</p>`}

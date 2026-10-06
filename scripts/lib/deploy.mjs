@@ -33,3 +33,14 @@ export function bootstrapArgs({ email, review }) {
 export function copyFilter(path) {
   return !/[\\/]\.git([\\/]|$)/.test(path) && !/[\\/]node_modules[\\/]\.bin([\\/]|$)/.test(path);
 }
+
+// autocrlf off keeps upstream's line endings intact on Windows, so the Lambda package matches the pinned SHA.
+export const cloneArgs = (repo, dir) => ['-c', 'core.autocrlf=false', 'clone', repo, dir];
+
+// A directory without its own .git would make `git -C` fall through to the parent (this) repo, so refuse it.
+export function checkoutProblem({ dirExists, gitExists }, dir) {
+  if (dirExists && !gitExists) {
+    return `${dir} exists but is not a git checkout. Delete it and run the deploy again so it can be cloned fresh.`;
+  }
+  return null;
+}

@@ -5,20 +5,24 @@
 import { execFileSync } from 'node:child_process';
 import { cpSync, existsSync, mkdirSync, readFileSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { build } from 'esbuild';
-import { bucketName, copyFilter, deployArgs, packageArgs, parseRef, REGION, STACK, TRANSLATION_REPO } from './lib/deploy.mjs';
+import { bucketName, checkoutProblem, cloneArgs, copyFilter, deployArgs, packageArgs, parseRef, REGION, STACK, TRANSLATION_REPO } from './lib/deploy.mjs';
 
-const BUILD = 'infra/.build';
+const ROOT = fileURLToPath(new URL('..', import.meta.url));
+const BUILD = join(ROOT, 'infra/.build');
 const SOURCE = join(BUILD, 'translation-server');
 const PACKAGE = join(BUILD, 'translation-package');
 const FORMAT = join(BUILD, 'format');
 const review = process.argv.includes('--review');
 const run = (cmd, args, opts = {}) =>
-  execFileSync(cmd, args, { stdio: 'inherit', shell: process.platform === 'win32' && cmd === 'npm', ...opts });
+  execFileSync(cmd, args, { stdio: 'inherit', cwd: ROOT, shell: process.platform === 'win32' && cmd === 'npm', ...opts });
 
 function buildTranslationServer() {
-  const sha = parseRef(readFileSync('infra/translation-server.ref', 'utf8'));
-  if (!existsSync(SOURCE)) run('git', ['clone', TRANSLATION_REPO, SOURCE]);
+  const sha = parseRef(readFileSync(join(ROOT, 'infra/translation-server.ref'), 'utf8'));
+  const problem = checkoutProblem({ dirExists: existsSync(SOURCE), gitExists: existsSync(join(SOURCE, '.git')) }, SOURCE);
+  if (problem) throw new Error(problem);
+  if (!existsSync(SOURCE)) run('git', cloneArgs(TRANSLATION_REPO, SOURCE));
   run('git', ['-C', SOURCE, 'fetch', 'origin']);
   run('git', ['-C', SOURCE, 'checkout', '--detach', sha]);
   run('git', ['-C', SOURCE, 'submodule', 'update', '--init', '--recursive']);
@@ -33,7 +37,7 @@ function buildTranslationServer() {
 async function buildFormatter() {
   rmSync(FORMAT, { recursive: true, force: true });
   await build({
-    entryPoints: ['infra/format/index.mjs'],
+    entryPoints: [join(ROOT, 'infra/format/index.mjs')],
     outfile: join(FORMAT, 'index.mjs'),
     bundle: true,
     platform: 'node',
@@ -42,7 +46,7 @@ async function buildFormatter() {
     banner: { js: "import { createRequire } from 'node:module'; const require = createRequire(import.meta.url);" },
   });
   // esbuild does not bundle the CSL files format.mjs reads via import.meta.dirname, so ship them beside the bundle.
-  cpSync('infra/format/csl', join(FORMAT, 'csl'), { recursive: true });
+  cpSync(join(ROOT, 'infra/format/csl'), join(FORMAT, 'csl'), { recursive: true });
 }
 
 async function main() {

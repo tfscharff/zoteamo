@@ -5,7 +5,7 @@ export const CSP =
 
 export const SECURITY_HEADERS = {
   'Content-Security-Policy': CSP,
-  'Referrer-Policy': 'no-referrer',
+  'Referrer-Policy': 'same-origin',
   'X-Robots-Tag': 'noindex, nofollow',
   'X-Content-Type-Options': 'nosniff',
   'Cache-Control': 'no-store',

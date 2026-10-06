@@ -7,8 +7,9 @@ async function load(body) {
   vi.resetModules();
   await import('../../src/assets/enhance.js');
 }
-const flush = () => new Promise((resolve) => setTimeout(resolve, 80));
-const status = () => document.querySelector('[role="status"]').textContent;
+const status = () => document.querySelector('p.visually-hidden[role="status"]').textContent;
+// announce() fills the live region after a short timeout, so wait for the text instead of sleeping.
+const announced = (text) => vi.waitFor(() => expect(status()).toBe(text));
 
 beforeEach(() => {
   Object.defineProperty(navigator, 'clipboard', { value: { writeText: vi.fn(async () => {}) }, configurable: true });
@@ -21,16 +22,15 @@ it('adds copy buttons named after what they copy', async () => {
   const buttons = [...document.querySelectorAll('button.copy-button')];
   expect(buttons.map((b) => b.textContent)).toEqual(['Copy edit link (for members)', 'Copy citation for A Book']);
   buttons[1].click();
-  await flush();
+  await announced('Copied.');
   expect(navigator.clipboard.writeText).toHaveBeenCalledWith('Doe, J. (2020). A Book.');
-  expect(status()).toBe('Copied.');
 });
 
 it('copies the whole bibliography from the plain-text export', async () => {
   vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response('A.\n\nB.\n'));
   await load('<ul><li><a href="/l/v/export.txt?style=apa" data-copy-all>Plain text</a></li></ul>');
   document.querySelector('button.copy-button').click();
-  await flush();
+  await announced('Copied.');
   expect(navigator.clipboard.writeText).toHaveBeenCalledWith('A.\n\nB.\n');
 });
 
@@ -53,12 +53,11 @@ it('switches citation style without a reload and keeps focus on the picker', asy
   const fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response(`<!DOCTYPE html><html><body>${region('mla', 'MLA text')}</body></html>`));
   document.querySelector('#style').value = 'mla';
   document.querySelector('form.style-switch').dispatchEvent(new Event('submit', { cancelable: true }));
-  await flush();
+  await announced('Showing MLA citations.');
   expect(String(fetchSpy.mock.calls[0][0])).toBe('https://zoteamo.test/e/abc?style=mla');
   expect(document.querySelector('#items .citation').textContent).toBe('MLA text');
   expect(document.querySelectorAll('#items button.copy-button')).toHaveLength(1);
   expect(document.activeElement.id).toBe('style');
-  expect(status()).toBe('Showing MLA citations.');
 });
 
 it('moves focus to an error summary', async () => {
@@ -74,8 +73,7 @@ it('falls back to a normal form submit when the style fetch is not OK', async ()
   vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response('nope', { status: 500 }));
   const before = document.getElementById('items');
   document.querySelector('form.style-switch').dispatchEvent(new Event('submit', { cancelable: true }));
-  await flush();
-  expect(submit).toHaveBeenCalledTimes(1);
+  await vi.waitFor(() => expect(submit).toHaveBeenCalledTimes(1));
   expect(document.getElementById('items')).toBe(before);
 });
 
@@ -85,8 +83,7 @@ it('falls back to a normal form submit when the response has no #items', async (
   vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response('<!DOCTYPE html><html><body><p>Hi</p></body></html>'));
   const before = document.getElementById('items');
   document.querySelector('form.style-switch').dispatchEvent(new Event('submit', { cancelable: true }));
-  await flush();
-  expect(submit).toHaveBeenCalledTimes(1);
+  await vi.waitFor(() => expect(submit).toHaveBeenCalledTimes(1));
   expect(document.getElementById('items')).toBe(before);
 });
 
@@ -94,8 +91,7 @@ it('announces when the clipboard refuses', async () => {
   navigator.clipboard.writeText.mockRejectedValue(new Error('denied'));
   await load('<div class="field"><label for="l">Link</label><input id="l" value="x" data-copy></div>');
   document.querySelector('button.copy-button').click();
-  await flush();
-  expect(status()).toBe('Couldn’t copy automatically. Select the text and copy it instead.');
+  await announced('Couldn’t copy automatically. Select the text and copy it instead.');
 });
 
 it('restores the busy button when the page is shown again', async () => {
@@ -107,4 +103,15 @@ it('restores the busy button when the page is shown again', async () => {
   expect(button.textContent).toBe('Add to list');
   expect(button.hasAttribute('aria-disabled')).toBe(false);
   expect(form.dataset.busy).toBeUndefined();
+});
+
+it('re-announces a status message that arrived with the page', async () => {
+  await load('<p class="status-message" role="status">Added: A Book</p>');
+  await announced('Added: A Book');
+});
+
+it('stays quiet when the status message is empty', async () => {
+  await load('<p class="status-message" role="status"></p>');
+  await new Promise((resolve) => setTimeout(resolve, 100));
+  expect(status()).toBe('');
 });
