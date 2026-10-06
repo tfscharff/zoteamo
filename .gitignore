@@ -1,0 +1,11 @@
+node_modules/
+_site/
+.wrangler/
+.dev.vars
+.env
+*.env
+!lambda_config.env-sample
+infra/.build/
+.aws-sam/
+coverage/
+.claude/settings.local.json
