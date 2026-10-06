@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-Guidance for Claude Code agents working in this repository.
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## What this is
 
@@ -26,6 +26,34 @@ The "Decisions already made" table in it is settled, so don't reopen those decis
    at `0.x`. Release `1.0.0` (`--as 1.0.0`) once the site and Lambda are deployed and the live
    smoke test in the spec (§8) passes.
 5. Stop and ask the user only for things in "Needs the user" below. Otherwise work independently.
+
+## Commands (current)
+
+```bash
+npm test                                   # node:test suite (tests/**/*.test.mjs)
+node --test tests/release.test.mjs         # one file
+node --test --test-name-pattern="bumpFor"  # one test by name
+npm run ship -- "type: msg" --dry-run      # preview a release
+```
+
+`build`, `dev`, `validate`, Vitest and local `wrangler` commands are already pre-approved in
+`.claude/settings.json`; add the matching `package.json` scripts as you build them, and list them
+here.
+
+## Architecture in one screen
+
+```
+Browser ─▶ Pages (11ty static + Functions SSR) ─▶ D1 (lists, items, votes, cache)
+                     └─ SigV4 fetch (aws4fetch) ─┬▶ Lambda URL: translation-server (upstream)
+                                                 └▶ Lambda URL: zoteamo-format (citeproc-js)
+```
+
+- **Write path** (add/edit item): `functions/_lib/enrich.js` → translation-server for CSL-JSON →
+  `zoteamo-format` for APA/MLA/Chicago HTML + text → sanitize → store in D1.
+- **Read path** (list pages, exports): Functions read stored strings only. No formatting here.
+- Lambdas use Function URLs with `AWS_IAM` auth (never API Gateway). Cloudflare holds keys for an
+  IAM user that can only `lambda:InvokeFunctionUrl`.
+- No accounts: access is by unguessable edit/view tokens (spec §3, §5).
 
 ## Hard rules
 
@@ -62,6 +90,8 @@ npm run ship -- "feat(items): add voting" --body "Optional details.
 6. pushes and runs `gh release create`
 
 Notes:
+- `ship` refuses to run off `main` or with a clean tree. If you work in a branch or worktree,
+  merge to `main` first, then ship from there.
 - Use `--dry-run` to preview, and `--as X.Y.Z` to force a specific version.
 - Don't run `git commit` or `git tag` by hand for releases.
 - Keep commit headers short and imperative. Put the user-facing detail in `--body`.
