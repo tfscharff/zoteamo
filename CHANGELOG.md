@@ -3,6 +3,10 @@
 All notable changes to zoteamo. Every commit to `main` is a release, written by
 `npm run ship` ([Semantic Versioning](https://semver.org/), [Conventional Commits](https://www.conventionalcommits.org/)).
 
+## [0.3.0] - 2026-10-06
+
+- **feat(functions):** add HTML escaping, page layout and security middleware
+
 ## [0.2.0] - 2026-10-06
 
 - **feat(site):** add static home, about and 404 pages
