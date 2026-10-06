@@ -6,7 +6,7 @@ export class LambdaError extends Error {}
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 const TRANSLATION_TIMEOUT_MS = 35_000;
-const FORMAT_TIMEOUT_MS = 15_000;
+const FORMAT_TIMEOUT_MS = 25_000;
 
 function lambdaFailure(error) {
   const timedOut = error?.name === 'TimeoutError' || error?.name === 'AbortError';

@@ -1,0 +1,91 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >-
+  zoteamo: upstream Zotero translation-server and the zoteamo-format citation formatter, each behind an
+  IAM-authenticated Lambda Function URL. Always-free tier only: no API Gateway, no always-on compute.
+
+Resources:
+  TranslationLogs:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: /aws/lambda/zoteamo-translation
+      RetentionInDays: 7
+
+  FormatLogs:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: /aws/lambda/zoteamo-format
+      RetentionInDays: 7
+
+  TranslationFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: zoteamo-translation
+      Description: Zotero translation-server, upstream and unmodified (SHA in infra/translation-server.ref)
+      CodeUri: .build/translation-package/
+      Handler: src/lambda.handler
+      Runtime: nodejs24.x
+      MemorySize: 2048
+      Timeout: 30
+      ReservedConcurrentExecutions: 2
+      LoggingConfig:
+        LogGroup: !Ref TranslationLogs
+      Environment:
+        Variables:
+          NODE_ENV: production
+          # Lambda's managed Node runtimes disable require(esm); upstream's jsdom needs it.
+          NODE_OPTIONS: '--experimental-require-module'
+      FunctionUrlConfig:
+        AuthType: AWS_IAM
+
+  FormatFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: zoteamo-format
+      Description: Formats CSL-JSON as APA, MLA and Chicago with citeproc-js
+      CodeUri: .build/format/
+      Handler: index.handler
+      Runtime: nodejs24.x
+      # 1769 MB is one full vCPU. The citeproc engines take about 3.5 s to build at module load, inside the 10 s init cap.
+      MemorySize: 1769
+      Timeout: 20
+      ReservedConcurrentExecutions: 2
+      LoggingConfig:
+        LogGroup: !Ref FormatLogs
+      FunctionUrlConfig:
+        AuthType: AWS_IAM
+
+  CloudflareUser:
+    Type: AWS::IAM::User
+    Properties:
+      UserName: zoteamo-cloudflare
+      Policies:
+        - PolicyName: invoke-zoteamo-function-urls
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action: lambda:InvokeFunctionUrl
+                Resource:
+                  - !GetAtt TranslationFunction.Arn
+                  - !GetAtt FormatFunction.Arn
+                Condition:
+                  StringEquals:
+                    lambda:FunctionUrlAuthType: AWS_IAM
+              # Function URLs created since October 2025 also need InvokeFunction; the condition keeps it URL-only.
+              - Effect: Allow
+                Action: lambda:InvokeFunction
+                Resource:
+                  - !GetAtt TranslationFunction.Arn
+                  - !GetAtt FormatFunction.Arn
+                Condition:
+                  Bool:
+                    lambda:InvokedViaFunctionUrl: 'true'
+
+Outputs:
+  TranslationUrl:
+    Value: !GetAtt TranslationFunctionUrl.FunctionUrl
+  FormatUrl:
+    Value: !GetAtt FormatFunctionUrl.FunctionUrl
+  CloudflareUserName:
+    Value: !Ref CloudflareUser
