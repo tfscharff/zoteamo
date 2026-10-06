@@ -1,5 +1,6 @@
 // The main list page, for both the view link and the edit link.
 import { html } from '../html.js';
+import { itemsRegion } from './items-region.js';
 import { linksPanel } from './links-panel.js';
 import { errorMessage, statusMessage } from './messages.js';
 
@@ -12,5 +13,5 @@ ${canEdit ? '' : html`<p>You’re viewing a read-only copy of this list.</p>`}
 <p class="status-message" role="status">${status ?? ''}</p>
 ${error ? html`<div class="notice notice-error" role="alert"><p>${error}</p></div>` : ''}
 ${canEdit ? linksPanel({ list, token, origin, params, forms }) : ''}
-<p>No items yet.</p>`;
+${itemsRegion({ items, style, canEdit, token, list })}`;
 }
