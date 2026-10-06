@@ -39,3 +39,19 @@ export async function saveCitation(db, itemId, d, now = NOW()) {
     d.text.apa, d.text.mla, d.text.chicago, d.bibtex, d.ris, d.coins, now, itemId,
   ).run();
 }
+
+export async function saveZoteroJson(db, itemId, zoteroItem, now = NOW()) {
+  await db.prepare(
+    `UPDATE items SET zotero_json = ?, title = COALESCE(NULLIF(?, ''), title),
+       citation_state = 'pending', citation_error = NULL, updated_at = ? WHERE id = ?`,
+  ).bind(JSON.stringify(zoteroItem), String(zoteroItem.title ?? '').trim(), now, itemId).run();
+}
+
+export async function setCitationError(db, itemId, message, now = NOW()) {
+  await db.prepare('UPDATE items SET citation_error = ?, updated_at = ? WHERE id = ?').bind(message, now, itemId).run();
+}
+
+export async function markFailed(db, itemId, message, now = NOW()) {
+  await db.prepare(`UPDATE items SET citation_state = 'failed', citation_error = ?, updated_at = ? WHERE id = ?`)
+    .bind(message, now, itemId).run();
+}
