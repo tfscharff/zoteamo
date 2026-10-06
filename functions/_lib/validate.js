@@ -33,3 +33,20 @@ export function validateAddItem(form) {
   if (values.note.length > LIMITS.note) errors.push({ field: 'note', message: `Keep the note to ${LIMITS.note} characters or fewer.` });
   return { values, errors };
 }
+
+function isIsoDate(value) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  const date = new Date(`${value}T00:00:00Z`);
+  return !Number.isNaN(date.getTime()) && date.toISOString().startsWith(value);
+}
+
+export function validateStatus(form) {
+  const values = { status: form.get('status'), meetingDate: form.get('meeting_date'), note: form.get('note') };
+  const errors = [];
+  if (!STATUSES.includes(values.status)) errors.push({ field: 'status', message: 'Choose a status.' });
+  if (values.meetingDate && !isIsoDate(values.meetingDate)) {
+    errors.push({ field: 'meeting_date', message: 'Enter a real date for the meeting, for example 2026-10-20.' });
+  }
+  if (values.note.length > LIMITS.note) errors.push({ field: 'note', message: `Keep the note to ${LIMITS.note} characters or fewer.` });
+  return { values, errors };
+}

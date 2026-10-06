@@ -29,3 +29,15 @@ export async function findListByViewToken(db, token) {
 export async function findListByAnyToken(db, token) {
   return (await findListByViewToken(db, token)) ?? (await findListByEditToken(db, token));
 }
+
+export async function updateListSettings(db, listId, { title, description, defaultStyle }, now = NOW()) {
+  await db.prepare('UPDATE lists SET title = ?, description = ?, default_style = ?, updated_at = ? WHERE id = ?')
+    .bind(title, description, defaultStyle, now, listId).run();
+}
+
+export async function rotateEditToken(db, listId, now = NOW()) {
+  const editToken = newToken();
+  await db.prepare('UPDATE lists SET edit_token_hash = ?, updated_at = ? WHERE id = ?')
+    .bind(await hashToken(editToken), now, listId).run();
+  return editToken;
+}

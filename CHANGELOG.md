@@ -3,6 +3,10 @@
 All notable changes to zoteamo. Every commit to `main` is a release, written by
 `npm run ship` ([Semantic Versioning](https://semver.org/), [Conventional Commits](https://www.conventionalcommits.org/)).
 
+## [0.11.0] - 2026-10-06
+
+- **feat(items):** add voting, status, deletion and list settings
+
 ## [0.10.0] - 2026-10-06
 
 - **feat(items):** add items by link or identifier

@@ -1,6 +1,7 @@
 // One item as a heading-led article. Citation HTML was sanitized when it was saved, so it's trusted here.
 import { html, raw } from '../html.js';
 import { STATUS_LABELS } from '../validate.js';
+import { itemActions } from './item-actions.js';
 
 const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
@@ -20,7 +21,7 @@ function citation(item, style) {
   return html`<p class="citation citation-missing">${lead}${item.citation_error ? `: ${item.citation_error}` : '.'}</p>`;
 }
 
-export function itemArticle(item, { style }) {
+export function itemArticle(item, { style, canEdit = false, token = '' }) {
   const id = `item-${item.id}`;
   const title = itemTitle(item);
   return html`<article class="item" id="${id}" aria-labelledby="${id}-title">
@@ -32,5 +33,6 @@ ${item.added_by ? html`<div><dt>Added by</dt><dd>${item.added_by}</dd></div>` : 
 <div><dt>Votes</dt><dd>${item.votes}</dd></div>
 </dl>
 ${item.note ? html`<p class="item-note"><strong>Note:</strong> ${item.note}</p>` : ''}
+${canEdit ? itemActions(item, { token, title }) : ''}
 </article>`;
 }

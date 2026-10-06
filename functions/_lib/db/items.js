@@ -64,3 +64,15 @@ export async function countItemsSince(db, listId, sinceIso) {
 export async function deleteItem(db, listId, itemId) {
   await db.prepare('DELETE FROM items WHERE id = ? AND list_id = ?').bind(itemId, listId).run();
 }
+
+export async function toggleVote(db, itemId, voterId, now = NOW()) {
+  const removed = await db.prepare('DELETE FROM votes WHERE item_id = ? AND voter_id = ?').bind(itemId, voterId).run();
+  if (removed.meta.changes > 0) return false;
+  await db.prepare('INSERT INTO votes (item_id, voter_id, created_at) VALUES (?, ?, ?)').bind(itemId, voterId, now).run();
+  return true;
+}
+
+export async function updateStatus(db, listId, itemId, { status, meetingDate, note }, now = NOW()) {
+  await db.prepare('UPDATE items SET status = ?, meeting_date = ?, note = ?, updated_at = ? WHERE id = ? AND list_id = ?')
+    .bind(status, meetingDate || null, note, now, itemId, listId).run();
+}
