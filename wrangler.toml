@@ -6,6 +6,5 @@ compatibility_flags = ["nodejs_compat"]
 [[d1_databases]]
 binding = "DB"
 database_name = "zoteamo"
-# Replaced with the real ID in Task 17. Local dev and tests ignore it.
-database_id = "00000000-0000-0000-0000-000000000000"
+database_id = "cbc81b84-fd90-4983-9783-700c774e3e3f"
 migrations_dir = "migrations"
