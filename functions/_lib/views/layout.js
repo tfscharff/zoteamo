@@ -1,5 +1,5 @@
 // Page shell for server-rendered pages. Keep the header and footer in step with src/_includes/base.njk.
-import site from '../../../src/_data/site.json' with { type: 'json' };
+import site from '../../../src/_data/site.js';
 import { html, raw } from '../html.js';
 import { htmlResponse } from '../http.js';
 

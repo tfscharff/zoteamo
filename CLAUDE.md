@@ -124,7 +124,7 @@ to paste secrets into the chat.
   - Vitest + `@cloudflare/vitest-pool-workers`
 - **Follow the patterns in the sibling site** `C:\Users\thoma\Documents\integratedlibrarysystems`
   (also 11ty, Pages Functions and D1): custom CSS without frameworks, self-hosted fonts,
-  `html-validate`, `src/_data/site.json`.
+  `html-validate`, `src/_data/site.js`.
 - **Small, single-purpose modules.** If a file grows past about 200 lines, split it.
 - **Update `README.md`** when setup, deployment or usage changes.
 - **AWS:** account 145395257847, region us-east-1. The AWS CLI v2 is installed and logged in.
