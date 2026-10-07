@@ -3,6 +3,10 @@
 All notable changes to zoteamo. Every commit to `main` is a release, written by
 `npm run ship` ([Semantic Versioning](https://semver.org/), [Conventional Commits](https://www.conventionalcommits.org/)).
 
+## [0.16.4] - 2026-10-07
+
+- **fix(infra):** skip reserved concurrency on new AWS accounts
+
 ## [0.16.3] - 2026-10-07
 
 - **fix(site):** load site data from JS so Pages can bundle Functions

@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { bootstrapArgs, bucketName, checkoutProblem, cloneArgs, copyFilter, deployArgs, packageArgs, parseRef } from '../scripts/lib/deploy.mjs';
+import { bootstrapArgs, bucketName, checkoutProblem, cloneArgs, copyFilter, deployArgs, packageArgs, parseRef, reservedConcurrencyFor } from '../scripts/lib/deploy.mjs';
 
 test('parseRef accepts only a full commit SHA', () => {
   assert.equal(parseRef(' 3a9d17614896fc1fea73d7b880ea79273b605275\n'), '3a9d17614896fc1fea73d7b880ea79273b605275');
@@ -27,6 +27,19 @@ test('deploy needs named IAM and only stops at the change set when reviewing', (
   assert.equal(live[live.indexOf('--stack-name') + 1], 'zoteamo');
   assert.ok(!live.includes('--no-execute-changeset'));
   assert.ok(deployArgs({ review: true }).includes('--no-execute-changeset'));
+});
+
+test('deploy passes the reserved concurrency as a stack parameter', () => {
+  const args = deployArgs({ review: false, reservedConcurrency: 0 });
+  assert.equal(args[args.indexOf('--parameter-overrides') + 1], 'ReservedConcurrency=0');
+  assert.ok(!deployArgs({ review: false }).includes('--parameter-overrides'));
+});
+
+test('reserved concurrency is 2 only when the account limit leaves AWS its 100 unreserved', () => {
+  assert.equal(reservedConcurrencyFor(1000), 2);
+  assert.equal(reservedConcurrencyFor(104), 2);
+  assert.equal(reservedConcurrencyFor(103), 0);
+  assert.equal(reservedConcurrencyFor(10), 0);
 });
 
 test('bootstrap requires an email address and passes it as a parameter', () => {

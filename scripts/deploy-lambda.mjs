@@ -7,7 +7,7 @@ import { cpSync, existsSync, mkdirSync, readFileSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { build } from 'esbuild';
-import { bucketName, checkoutProblem, cloneArgs, copyFilter, deployArgs, packageArgs, parseRef, REGION, STACK, TRANSLATION_REPO } from './lib/deploy.mjs';
+import { bucketName, checkoutProblem, cloneArgs, copyFilter, deployArgs, packageArgs, parseRef, REGION, reservedConcurrencyFor, STACK, TRANSLATION_REPO } from './lib/deploy.mjs';
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
 const BUILD = join(ROOT, 'infra/.build');
@@ -54,8 +54,11 @@ async function main() {
   buildTranslationServer();
   await buildFormatter();
   const account = execFileSync('aws', ['sts', 'get-caller-identity', '--query', 'Account', '--output', 'text'], { encoding: 'utf8' }).trim();
+  const limit = Number(execFileSync('aws', ['lambda', 'get-account-settings', '--region', REGION, '--query', 'AccountLimit.ConcurrentExecutions', '--output', 'text'], { encoding: 'utf8' }).trim());
+  const reservedConcurrency = reservedConcurrencyFor(limit);
+  console.log(`Account ${account}: Lambda concurrency limit ${limit}, so reserved concurrency per function is ${reservedConcurrency || 'unset'}.`);
   run('aws', packageArgs(bucketName(account)));
-  run('aws', deployArgs({ review }));
+  run('aws', deployArgs({ review, reservedConcurrency }));
   if (!review) {
     run('aws', ['cloudformation', 'describe-stacks', '--region', REGION, '--stack-name', STACK, '--query', 'Stacks[0].Outputs', '--output', 'table']);
   }

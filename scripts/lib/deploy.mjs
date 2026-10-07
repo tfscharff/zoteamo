@@ -17,11 +17,16 @@ export function packageArgs(bucket) {
     '--s3-bucket', bucket, '--output-template-file', 'infra/.build/packaged.yaml'];
 }
 
-export function deployArgs({ review }) {
+export function deployArgs({ review, reservedConcurrency }) {
+  const overrides = reservedConcurrency === undefined ? [] : ['--parameter-overrides', `ReservedConcurrency=${reservedConcurrency}`];
   return ['cloudformation', 'deploy', '--region', REGION, '--template-file', 'infra/.build/packaged.yaml',
     '--stack-name', STACK, '--capabilities', 'CAPABILITY_IAM', 'CAPABILITY_NAMED_IAM', 'CAPABILITY_AUTO_EXPAND',
-    '--no-fail-on-empty-changeset', ...(review ? ['--no-execute-changeset'] : [])];
+    ...overrides, '--no-fail-on-empty-changeset', ...(review ? ['--no-execute-changeset'] : [])];
 }
+
+// AWS keeps at least 100 executions unreserved, so new accounts (limit 10) can't reserve any. Their
+// account-wide limit caps the functions instead, until AWS raises it.
+export const reservedConcurrencyFor = (accountLimit) => (accountLimit - 2 * 2 >= 100 ? 2 : 0);
 
 export function bootstrapArgs({ email, review }) {
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email ?? '')) throw new Error('Pass the budget alert address with --email you@example.com.');

@@ -13,9 +13,10 @@ test('no API Gateway or anything billed by the hour', () => {
   for (const text of [main, boot]) for (const re of banned) assert.doesNotMatch(text, re);
 });
 
-test('both functions sit behind IAM-auth Function URLs with reserved concurrency 2', () => {
+test('both functions sit behind IAM-auth Function URLs with reserved concurrency 2 by default', () => {
   assert.equal(count(main, /^\s+AuthType: AWS_IAM/gm), 2);
-  assert.equal(count(main, /ReservedConcurrentExecutions: 2\b/g), 2);
+  assert.match(main, /ReservedConcurrency:\s*\n\s+Type: Number\s*\n\s+Default: 2\b/);
+  assert.equal(count(main, /ReservedConcurrentExecutions: !If \[ReserveConcurrency, !Ref ReservedConcurrency, !Ref AWS::NoValue\]/g), 2);
 });
 
 test('logs are kept for 7 days', () => {

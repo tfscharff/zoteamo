@@ -4,6 +4,18 @@ Description: >-
   zoteamo: upstream Zotero translation-server and the zoteamo-format citation formatter, each behind an
   IAM-authenticated Lambda Function URL. Always-free tier only: no API Gateway, no always-on compute.
 
+Parameters:
+  ReservedConcurrency:
+    Type: Number
+    Default: 2
+    MinValue: 0
+    Description: >-
+      Reserved concurrency per function. 0 leaves it unset, for new accounts whose Lambda limit (10) can't
+      spare any; their account-wide limit caps the functions instead. The deploy script picks this.
+
+Conditions:
+  ReserveConcurrency: !Not [!Equals [!Ref ReservedConcurrency, 0]]
+
 Resources:
   TranslationLogs:
     Type: AWS::Logs::LogGroup
@@ -27,7 +39,7 @@ Resources:
       Runtime: nodejs24.x
       MemorySize: 2048
       Timeout: 30
-      ReservedConcurrentExecutions: 2
+      ReservedConcurrentExecutions: !If [ReserveConcurrency, !Ref ReservedConcurrency, !Ref AWS::NoValue]
       LoggingConfig:
         LogGroup: !Ref TranslationLogs
       Environment:
@@ -49,7 +61,7 @@ Resources:
       # 1769 MB is one full vCPU. The citeproc engines take about 3.5 s to build at module load, inside the 10 s init cap.
       MemorySize: 1769
       Timeout: 20
-      ReservedConcurrentExecutions: 2
+      ReservedConcurrentExecutions: !If [ReserveConcurrency, !Ref ReservedConcurrency, !Ref AWS::NoValue]
       LoggingConfig:
         LogGroup: !Ref FormatLogs
       FunctionUrlConfig:
