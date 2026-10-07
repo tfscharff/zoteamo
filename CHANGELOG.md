@@ -3,6 +3,10 @@
 All notable changes to zoteamo. Every commit to `main` is a release, written by
 `npm run ship` ([Semantic Versioning](https://semver.org/), [Conventional Commits](https://www.conventionalcommits.org/)).
 
+## [1.0.1] - 2026-10-07
+
+- **docs:** record follow-ups deferred from review
+
 ## [1.0.0] - 2026-10-07
 
 - **feat:** launch zoteamo

@@ -1,6 +1,6 @@
 {
   "name": "zoteamo",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "private": true,
   "description": "Collaborative reading lists for reading groups: paste a URL, DOI or ISBN, get proper citations.",
   "license": "AGPL-3.0-or-later",
