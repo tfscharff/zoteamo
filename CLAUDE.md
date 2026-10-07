@@ -9,9 +9,10 @@ and get proper APA, MLA or Chicago citations, using
 [Zotero translation-server](https://github.com/zotero/translation-server) for metadata. Repo:
 https://github.com/tfscharff/zoteamo (public, AGPL-3.0-or-later).
 
-**Status (2026-10-06):** design approved; no product code yet. The design is
-`docs/superpowers/specs/2026-10-06-zoteamo-design.md`. **Read it in full before doing anything.**
-The "Decisions already made" table in it is settled, so don't reopen those decisions.
+**Status (2026-10-07):** live at https://zoteamo.pages.dev (1.0.0). The design is
+`docs/superpowers/specs/2026-10-06-zoteamo-design.md` and the plan, with its deviations table, is
+`docs/superpowers/plans/2026-10-06-zoteamo.md`. Read the spec before changing behavior. The
+"Decisions already made" table in it is settled, so don't reopen those decisions.
 
 ## Your job, in order
 

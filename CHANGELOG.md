@@ -3,6 +3,10 @@
 All notable changes to zoteamo. Every commit to `main` is a release, written by
 `npm run ship` ([Semantic Versioning](https://semver.org/), [Conventional Commits](https://www.conventionalcommits.org/)).
 
+## [1.0.0] - 2026-10-07
+
+- **feat:** launch zoteamo
+
 ## [0.16.6] - 2026-10-07
 
 - **chore(infra):** add a script that stores the AWS key in Cloudflare

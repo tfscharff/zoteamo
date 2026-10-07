@@ -8,7 +8,7 @@ Metadata comes from [Zotero translation-server](https://github.com/zotero/transl
 running on AWS Lambda's always-free tier. The site runs on Cloudflare Pages and D1's free tiers.
 Hosting costs $0.
 
-> **Status:** deploying to https://zoteamo.pages.dev. Design:
+> **Status:** live at https://zoteamo.pages.dev. Design:
 > [`docs/superpowers/specs/2026-10-06-zoteamo-design.md`](docs/superpowers/specs/2026-10-06-zoteamo-design.md).
 
 ## Features
