@@ -37,6 +37,17 @@ describe('votes', () => {
     expect(await votes(itemId)).toBeLessThanOrEqual(1);
   });
 
+  it('counts each voter separately and only removes their own vote', async () => {
+    const { editToken, itemId } = await setup();
+    const OTHER = 'zoteamo_voter=0a1b2c3d-4e5f-4a6b-8c7d-9e0f1a2b3c4d';
+    await post(voteRoute, editToken, `/items/${itemId}/vote`, { id: itemId, cookie: VOTER });
+    await post(voteRoute, editToken, `/items/${itemId}/vote`, { id: itemId, cookie: OTHER });
+    expect(await votes(itemId)).toBe(2);
+    await post(voteRoute, editToken, `/items/${itemId}/vote`, { id: itemId, cookie: OTHER });
+    const { results } = await env.DB.prepare('SELECT voter_id FROM votes WHERE item_id = ?').bind(itemId).all();
+    expect(results).toEqual([{ voter_id: '6f1c2a8e-1b2c-4d5e-8f90-123456789abc' }]);
+  });
+
   it('gives a new voter a cookie', async () => {
     const { editToken, itemId } = await setup();
     const res = await post(voteRoute, editToken, `/items/${itemId}/vote`, { id: itemId });
@@ -74,6 +85,14 @@ describe('status', () => {
     expect(res.status).toBe(422);
     expect(await res.text()).toContain(`<a href="#item-${itemId}-meeting_date">`);
     expect((await row(itemId)).status).toBe('suggested');
+  });
+
+  it('refuses a status that is not offered and keeps the item as it was', async () => {
+    const { editToken, itemId } = await setup();
+    const res = await post(statusRoute, editToken, `/items/${itemId}/status`, { id: itemId, form: { status: 'archived', meeting_date: '', note: 'x' } });
+    expect(res.status).toBe(422);
+    expect(await res.text()).toContain('Choose a status.');
+    expect(await row(itemId)).toMatchObject({ status: 'suggested', note: '' });
   });
 });
 
@@ -125,6 +144,28 @@ describe('list settings and edit link', () => {
     const page = await res.text();
     expect(page).toContain('<details class="links-panel" open>');
     expect(page).toContain('<a href="#list-title">Enter a name for the list.</a>');
+  });
+
+  it('does not save a default style that is not offered', async () => {
+    const { id, editToken } = await createTestList();
+    const res = await post(settingsRoute, editToken, '/settings', { form: { title: 'Renamed', description: '', default_style: 'harvard' } });
+    expect(res.status).toBe(422);
+    expect(await env.DB.prepare('SELECT title, default_style FROM lists WHERE id = ?').bind(id).first())
+      .toEqual({ title: 'Test list', default_style: 'apa' });
+  });
+
+  it('refuses every change through a retired edit link', async () => {
+    const { id, editToken, itemId } = await setup();
+    await post(rotateRoute, editToken, '/rotate-edit-link');
+    const attempts = [
+      post(settingsRoute, editToken, '/settings', { form: { title: 'Hijacked', description: '', default_style: 'mla' } }),
+      post(rotateRoute, editToken, '/rotate-edit-link'),
+      post(statusRoute, editToken, `/items/${itemId}/status`, { id: itemId, form: { status: 'discussed', meeting_date: '', note: '' } }),
+      post(deleteRoute, editToken, `/items/${itemId}/delete`, { id: itemId }),
+    ];
+    for (const res of await Promise.all(attempts)) expect(res.status).toBe(404);
+    expect((await env.DB.prepare('SELECT title FROM lists WHERE id = ?').bind(id).first()).title).toBe('Test list');
+    expect(await row(itemId)).toMatchObject({ status: 'suggested' });
   });
 
   it('replaces the edit link and retires the old one', async () => {

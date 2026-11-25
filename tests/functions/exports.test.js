@@ -39,7 +39,7 @@ describe('exports', () => {
     expect(await (await get(viewToken, 'export.txt')).text()).toContain('Doe, J. (2020). First.');
   });
 
-  it.each([['export.pdf'], ['index.html']])('returns 404 for %s', async (file) => {
+  it.each([['export.pdf'], ['index.html'], ['__proto__'], ['constructor'], ['hasOwnProperty']])('returns 404 for %s', async (file) => {
     const { viewToken } = await setup();
     expect((await get(viewToken, file)).status).toBe(404);
   });
