@@ -55,6 +55,10 @@ Without Lambda credentials, adding an item fails gracefully and opens the manual
   `npm run deploy:lambda` deploys. translation-server is pinned in `infra/translation-server.ref`; to
   upgrade, change the SHA and redeploy. On new accounts (Lambda concurrency limit 10), reserved
   concurrency is left unset until AWS raises the limit.
+- **IAM key for Cloudflare:** `scripts/set-cloudflare-key.ps1` creates the key and stores it in
+  Cloudflare. It first checks that profile `zoteamo` is the expected account, whose ID it reads from
+  `ZOTEAMO_AWS_ACCOUNT_ID` or the git-ignored file `.aws-account-id` at the repo root, and stops if
+  neither is set.
 - **Cloudflare Pages secrets:** `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` (IAM user
   `zoteamo-cloudflare`), `AWS_REGION`, and `TRANSLATION_URL` and `FORMAT_URL` (the stack's outputs).
 

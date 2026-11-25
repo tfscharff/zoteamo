@@ -309,7 +309,7 @@ private repos).
   1. clones translation-server at the pinned SHA into `infra/.build/`
   2. runs `npm ci --omit=dev` there
   3. builds `infra/format/`
-  4. runs `aws cloudformation package --s3-bucket zoteamo-deploy-145395257847`, then
+  4. runs `aws cloudformation package --s3-bucket zoteamo-deploy-<account ID>` (the AWS account's own deploy bucket), then
      `aws cloudformation deploy --capabilities CAPABILITY_IAM`. The `AWS::Serverless` transform
      runs inside CloudFormation, so the SAM CLI isn't needed.
 - **Steps the user does themselves** (credentials and account linking): connecting Cloudflare to
