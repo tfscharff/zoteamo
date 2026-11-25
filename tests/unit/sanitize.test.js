@@ -22,6 +22,11 @@ describe('sanitizeCitation', () => {
     ['ignores self-closing allowed tags', '<i/>x', 'x'],
     ['cleans class values', '<span class="a&quot; b">t</span>', '<span class="aquot b">t</span>'],
     ['handles empty input', undefined, ''],
+    ['drops scripts in any case', 'a<SCRIPT type="x">alert(1)</ScRiPt>b', 'ab'],
+    ['drops everything after an unclosed script', 'a<script>alert(1)<i>b</i>', 'a'],
+    ['drops images and their handlers', 'a<img src=x onerror="alert(1)">b<svg onload=alert(1)>c</svg>', 'abc'],
+    ['escapes the rest of an attribute that hides a >', '<i title="a>b">x</i>', '<i>b&quot;&gt;x</i>'],
+    ['escapes a split tag instead of rebuilding it', '<scr<script>ipt>alert(1)</script>', 'ipt&gt;alert(1)'],
   ])('%s', (_name, input, expected) => {
     expect(sanitizeCitation(input)).toBe(expected);
   });
