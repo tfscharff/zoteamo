@@ -10,3 +10,5 @@ infra/.build/
 coverage/
 .claude/settings.local.json
 .a11y/
+CLAUDE.local.md
+.aws-account-id

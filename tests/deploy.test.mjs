@@ -13,7 +13,7 @@ test('the pinned translation-server ref is a full SHA', () => {
 });
 
 test('the deploy bucket is our own, named per account', () => {
-  assert.equal(bucketName('145395257847'), 'zoteamo-deploy-145395257847');
+  assert.equal(bucketName('123456789012'), 'zoteamo-deploy-123456789012');
   const args = packageArgs('zoteamo-deploy-1');
   assert.deepEqual(args.slice(0, 2), ['cloudformation', 'package']);
   assert.equal(args[args.indexOf('--s3-bucket') + 1], 'zoteamo-deploy-1');

@@ -128,10 +128,12 @@ to paste secrets into the chat.
   `html-validate`, `src/_data/site.js`.
 - **Small, single-purpose modules.** If a file grows past about 200 lines, split it.
 - **Update `README.md`** when setup, deployment or usage changes.
-- **AWS:** the user's personal account 022741688075, region us-east-1, CLI profile `zoteamo`
+- **AWS:** the user's personal account, region us-east-1, CLI profile `zoteamo`
   (sign in with `aws login --profile zoteamo` in a normal PowerShell window). Prefix every AWS command
   and deploy script with `AWS_PROFILE=zoteamo`. **Never use the default profile: it is the user's work
-  account (145395257847), which zoteamo must not use.** The account's Lambda concurrency limit is 10, so
+  account, which zoteamo must not use.** Both account IDs are in the git-ignored `CLAUDE.local.md`
+  in the main folder; check the active account against it with
+  `aws sts get-caller-identity --profile zoteamo` before any change. The account's Lambda concurrency limit is 10, so
   `deploy:lambda` leaves reserved concurrency unset until AWS raises it.
   **The SAM CLI is not installed;** deploy with `aws cloudformation package` and `deploy` instead.
   `wrangler` isn't installed globally; add it as a devDependency. The old 2020 SAM bucket and stacks were deleted on 2026-10-06; don't recreate SAM's
